@@ -259,3 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/GP-IB Interface/DataS11
+/GP-IB Interface/Dats
+/GP-IB Interface/s11attempt2V.txt
+*.txt
+*.zip

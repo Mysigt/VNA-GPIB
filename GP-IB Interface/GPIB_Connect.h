@@ -10,8 +10,10 @@ public:
 	CString m_strInstrAddr; //instrument address
 	CString m_strResult; //Return value
 
-	void ConnectHP3577A(); //initialize connection with HP3577A
-	void ConnectHP4195A(); //initialize connection with HP4195A
+	//void ConnectHP3577A(); //initialize connection with HP3577A
+	//void ConnectHP4195A(); //initialize connection with HP4195A
+	void Connect();
+	void ConnectOldHP();
 	void Send(CString m_strCommand); //send command to instrument
 	void Read(CString &ReadOut); //read from instrument
 

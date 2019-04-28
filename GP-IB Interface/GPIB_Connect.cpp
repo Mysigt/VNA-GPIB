@@ -5,7 +5,7 @@
 #include <atlstr.h> //defines CString
 #include "GPIB_Connect.h" 
 #include "visa.h" //must download NI-VISA and add to additional library 
-#define MAX_REC_SIZE 20000
+#define MAX_REC_SIZE 100000
 
 using namespace std;
 
@@ -67,7 +67,9 @@ bool Src::InstrRead(CString strAddr, CString *pstrResult)
 	}
 
 	status = viOpen(defaultRM, SendAddr, VI_NULL, VI_NULL, &instr); //open instrument
-	status = viRead(instr, RecBuf, MAX_REC_SIZE, &retCount); //write command to instrument
+	//status = viReadToFile(instr, filename, MAX_REC_SIZE,&retCount);
+	status = viBufRead(instr, RecBuf, MAX_REC_SIZE, &retCount);
+	//status = viRead(instr, RecBuf, MAX_REC_SIZE, &retCount); //write command to instrument
 
 	status = viClose(instr);
 	status = viClose(defaultRM);
@@ -78,59 +80,59 @@ bool Src::InstrRead(CString strAddr, CString *pstrResult)
 }
 
 
-void Src::ConnectHP3577A()
-{
-	ViSession defaultRM;
-	ViStatus status;
-	ViString expr = (char*)"?*";
-	ViPFindList findList = new unsigned long;
-	ViPUInt32 retCount = new unsigned long;
-	ViChar instrDesc[1000];
-	CString strSrc = "";
-	CString strInstr = "";
-	unsigned long i = 0;
-	bool bFind = false;
+//void Src::ConnectHP3577A()
+//{
+//	ViSession defaultRM;
+//	ViStatus status;
+//	ViString expr = (char*)"?*";
+//	ViPFindList findList = new unsigned long;
+//	ViPUInt32 retCount = new unsigned long;
+//	ViChar instrDesc[1000];
+//	CString strSrc = "";
+//	CString strInstr = "";
+//	unsigned long i = 0;
+//	bool bFind = false;
+//
+//	status = viOpenDefaultRM(&defaultRM);
+//
+//	if (status < VI_SUCCESS)
+//	{
+//		cout << "No VISA instrument opened :(";
+//		return;
+//	}
+//
+//	memset(instrDesc, 0, 1000);
+//	status = viFindRsrc(defaultRM, expr, findList, retCount, instrDesc);
+//
+//	for (i = 0; i < (*retCount); i++)
+//	{
+//		
+//		strSrc.Format("%s", instrDesc);
+//		//InstrWrite(strSrc, "*IDN?"); //command to identify VISA description of instrument
+//		//::Sleep(200);
+//		//InstrRead(strSrc,&strInstr); //get instrument name 
+//	
+//		strInstr.MakeUpper();
+//		if (strSrc.Find("GPIB0::11::INSTR") >= 0)  //if GPIB instrument is found series breaks out of loop 
+//		{
+//			bFind = true;
+//			m_strInstrAddr = strSrc; //Set instrument address for communication
+//		}
+//		status = viFindNext(*findList, instrDesc);
+//	}
+//
+//	if (bFind == false)
+//	{
+//		cout << "No Instrument found :( \n";
+//	}
+//	else
+//	{
+//		cout << "Connection successful \n";
+//		cout << "\nDevices: " << m_strInstrAddr << endl;
+//	}
+//}
 
-	status = viOpenDefaultRM(&defaultRM);
-
-	if (status < VI_SUCCESS)
-	{
-		cout << "No VISA instrument opened :(";
-		return;
-	}
-
-	memset(instrDesc, 0, 1000);
-	status = viFindRsrc(defaultRM, expr, findList, retCount, instrDesc);
-
-	for (i = 0; i < (*retCount); i++)
-	{
-		
-		strSrc.Format("%s", instrDesc);
-		//InstrWrite(strSrc, "*IDN?"); //command to identify VISA description of instrument
-		//::Sleep(200);
-		//InstrRead(strSrc,&strInstr); //get instrument name 
-	
-		strInstr.MakeUpper();
-		if (strSrc.Find("GPIB0::11::INSTR") >= 0)  //if GPIB instrument is found series breaks out of loop 
-		{
-			bFind = true;
-			m_strInstrAddr = strSrc; //Set instrument address for communication
-		}
-		status = viFindNext(*findList, instrDesc);
-	}
-
-	if (bFind == false)
-	{
-		cout << "No Instrument found :( \n";
-	}
-	else
-	{
-		cout << "Connection successful \n";
-		cout << "\nDevices: " << m_strInstrAddr << endl;
-	}
-}
-
-void Src::ConnectHP4195A()
+void Src::Connect()
 {
 	ViSession defaultRM;
 	ViStatus status;
@@ -159,7 +161,61 @@ void Src::ConnectHP4195A()
 	{
 
 		strSrc.Format("%s", instrDesc);
-		InstrWrite(strSrc, "FMT1; ID?"); //command to identify VISA description of instrument
+		InstrWrite(strSrc, "*IDN?"); //command to identify VISA description of instrument
+		::Sleep(200);
+		InstrRead(strSrc, &strInstr); //get instrument name 
+
+		strInstr.MakeUpper();
+		if (strInstr.Find("HEWLETT") >= 0)  //if instrument is found as being in DP series break out of loop 
+		{
+			bFindDP = true;
+			m_strInstrAddr = strSrc; //Set instrument address for communication
+			instrNum++;
+		}
+		status = viFindNext(*findList, instrDesc);
+	}
+
+	if (bFindDP == false)
+	{
+		cout << "Instrument not found :( \n";
+	}
+	else
+	{
+		cout << "Connection successful \n";
+		cout << "\nDevice: " << strInstr << endl;
+	}
+}
+
+void Src::ConnectOldHP()
+{
+	ViSession defaultRM;
+	ViStatus status;
+	ViString expr = (char*)"?*";
+	ViPFindList findList = new unsigned long;
+	ViPUInt32 retCount = new unsigned long;
+	ViChar instrDesc[1000];
+	CString strSrc = "";
+	CString strInstr = "";
+	unsigned long i = 0;
+	bool bFindDP = false;
+
+	status = viOpenDefaultRM(&defaultRM);
+
+	if (status < VI_SUCCESS)
+	{
+		cout << "No VISA instrument opened :(";
+		return;
+	}
+
+	memset(instrDesc, 0, 1000);
+	status = viFindRsrc(defaultRM, expr, findList, retCount, instrDesc);
+
+	int instrNum = 0; //to keep track of number of instruments for assigning addresses
+	for (i = 0; i < (*retCount); i++)
+	{
+
+		strSrc.Format("%s", instrDesc);
+		InstrWrite(strSrc, "ID?"); //command to identify VISA description of instrument
 		::Sleep(200);
 		InstrRead(strSrc, &strInstr); //get instrument name 
 
@@ -175,7 +231,7 @@ void Src::ConnectHP4195A()
 
 	if (bFindDP == false)
 	{
-		cout << "HP4195A not found :( \n";
+		cout << "Instrument not found :( \n";
 	}
 	else
 	{
@@ -183,6 +239,7 @@ void Src::ConnectHP4195A()
 		cout << "\nDevice: " << strInstr << endl;
 	}
 }
+
 //Send command to connected instrument
 void Src::Send(CString m_strCommand)
 {
