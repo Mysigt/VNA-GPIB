@@ -16,25 +16,44 @@ int main()
 	Src Instr; 
 	string filename; //text file name
 	string name; //value used for text file name
-	ofstream file;
+	ofstream file;	
+	char esc = 'y';
+	int VNA;
+
+	cout << "Select Analyzer: 1 - HP3577A, 2 - HP4195A, 3 - HP8720C";
+	cin >> VNA;
+	if (VNA == 3)
+	{
+		Instr.Connect(); //Connect to instrument	
+	}
+	else 
+	{
+		Instr.ConnectOldHP(); //Connect to instrument
+	}
+
+	while (esc != 'n')
+	{
 	cout << "Enter desired save file name\n";
 	cin >> name;
 	filename = name + ".txt";	
 	file.open(filename);
 
-	//DataHP4195A(Instr, file);
-	DataHP3577A(Instr,file); 
-	//DataHP(Instr, file);
-
+	switch (VNA)
+	{
+	case 1: DataHP3577A(Instr, file); break;
+	case 2: DataHP4195A(Instr, file); break;
+	case 3: DataHP(Instr, file); break; 
+	}
 	//Instr.Send("CLS");
 	file.close();
-	//getchar(); //just prevents from autoclosing console
+	}
+	cout << "Continue measuring? Press 'n' to stop otherwise press any other key";
+	cin >> esc;
 }
 
 void DataHP3577A(Src &Instr,ofstream &file)
 {
 	CString ReadOut;
-	Instr.ConnectOldHP(); //Connect to instrument
 	Instr.Send("FM1"); //Set data format to ASCII - Done here instead of in connect as source info not visible with instrument
 	Instr.Send("TR1; DF7; DT1"); //Dump trace 1 data containing magnitude info
 	Instr.Read(ReadOut); //Read data from instrument
@@ -62,7 +81,6 @@ void DataHP3577A(Src &Instr,ofstream &file)
 void DataHP4195A(Src &Instr, ofstream &file)
 {
 	CString ReadOut;
-	Instr.ConnectOldHP(); //Connect to instrument
 	Instr.Send("A?");
 	Instr.Read(ReadOut);
 	string mag(ReadOut);
@@ -79,7 +97,6 @@ void DataHP4195A(Src &Instr, ofstream &file)
 void DataHP(Src &Instr, ofstream &file)
 {
 	CString ReadOut;
-	Instr.Connect(); //Connect to instrument
 	//Instr.Send("FORM4");
 	Instr.Send("OUTPDATA");
 	Instr.Read(ReadOut);
