@@ -3,7 +3,6 @@
 #include <fstream>
 #include "GPIB_Connect.h"
 
-
 using namespace std;
 
 void DataHP4195A(Src &Instr, ofstream &file);
@@ -19,16 +18,16 @@ int main()
 	ofstream file;	
 	char cont = 'y';
 	int VNA,freq1,freq2,pts;
-	string measType;
+	string measTyp;
 
 	cout << "Select Analyzer: 1 - HP3577A, 2 - HP4195A, 3 - HP8720C \n";
 	cin >> VNA;
 	cout << "Define frequency range in MHz \n";
 	cin >> freq1 >> freq2;
+	cout << "Number of measurement points?" << endl;
+	cin >> pts;
 	cout << "Linear or logarithmic measurement?";
 	cin >> measTyp;
-	cout >> "Number of measurement points?";
-	cin << pts;
 
 
 	if (VNA == 3)
@@ -40,15 +39,15 @@ int main()
 		Instr.ConnectOldHP(); //Connect to instrument
 	}
 
-	while (esc != 'n')
+	while (cont != 'n')
 	{
 	cout << "Enter desired save file name\n";
 	cin >> name;
 	filename = name + ".txt";	
 	file.open(filename);
-	filename << measTyp <<" Freq range:" << freq1 << "-" << freq2 << endl;
-	filename << pts << endl;
-	filename << "Data"<<endl;
+	file <<" Freq range:" << freq1 << "-" << freq2 << endl;
+	file << pts << endl;
+	file << "Data"<<endl;
 
 	switch (VNA)
 	{
