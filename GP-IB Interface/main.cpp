@@ -17,11 +17,20 @@ int main()
 	string filename; //text file name
 	string name; //value used for text file name
 	ofstream file;	
-	char esc = 'y';
-	int VNA;
+	char cont = 'y';
+	int VNA,freq1,freq2,pts;
+	string measType;
 
-	cout << "Select Analyzer: 1 - HP3577A, 2 - HP4195A, 3 - HP8720C";
+	cout << "Select Analyzer: 1 - HP3577A, 2 - HP4195A, 3 - HP8720C \n";
 	cin >> VNA;
+	cout << "Define frequency range in MHz \n";
+	cin >> freq1 >> freq2;
+	cout << "Linear or logarithmic measurement?";
+	cin >> measTyp;
+	cout >> "Number of measurement points?";
+	cin << pts;
+
+
 	if (VNA == 3)
 	{
 		Instr.Connect(); //Connect to instrument	
@@ -37,6 +46,9 @@ int main()
 	cin >> name;
 	filename = name + ".txt";	
 	file.open(filename);
+	filename << measTyp <<" Freq range:" << freq1 << "-" << freq2 << endl;
+	filename << pts << endl;
+	filename << "Data"<<endl;
 
 	switch (VNA)
 	{
@@ -47,8 +59,8 @@ int main()
 	//Instr.Send("CLS");
 	file.close();
 	}
-	cout << "Continue measuring? Press 'n' to stop otherwise press any other key";
-	cin >> esc;
+	cout << "Continue measuring? Enter 'n' to stop otherwise press any other key";
+	cin >> cont;
 }
 
 void DataHP3577A(Src &Instr,ofstream &file)
