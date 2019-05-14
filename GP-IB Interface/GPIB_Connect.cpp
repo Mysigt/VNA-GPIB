@@ -5,7 +5,7 @@
 #include <atlstr.h> //defines CString
 #include "GPIB_Connect.h" 
 #include "visa.h" //must download NI-VISA and add to additional library 
-#define MAX_REC_SIZE 60000
+#define MAX_REC_SIZE 100000
 
 using namespace std;
 
